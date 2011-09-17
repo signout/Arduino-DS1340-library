@@ -32,7 +32,6 @@ public:
     static void adjust(const DateTime& dt);
     uint8_t isrunning(void);
     static DateTime now();
-    static DateTime setregs(void);
     static DateTime enabletricklecharger(void);
     static DateTime disabletricklecharger(void);
     static DateTime enableFTout(void);
