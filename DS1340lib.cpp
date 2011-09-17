@@ -155,7 +155,7 @@ void RTC_DS1340::adjust(const DateTime& dt) {
 DateTime RTC_DS1340::enabletricklecharger() {
   Wire.beginTransmission(DS1340_ADDRESS);
   Wire.send(8);	
-  Wire.send(0xA6); // No diode, 2k resistor
+  Wire.send(0xA6); // No diode, 2k resistor (Don't use 250 ohm on arduino. It will burn the resistor with VCC above 3.63V)
   Wire.endTransmission();
 }
 
