@@ -1,0 +1,6 @@
+Arduino library for the DS1340 from Maxim
+
+Examples for setting and getting the time is included.
+Support for FT output and trickle charge can be enabled.
+
+http://datasheets.maxim-ic.com/en/ds/DS1340-DS1340C.pdf
