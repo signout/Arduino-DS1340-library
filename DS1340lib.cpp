@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include <avr/pgmspace.h>
 #include "DS1340lib.h"
-#include <WProgram.h>
+#include <Arduino.h>
 
 #define DS1340_ADDRESS 0x68
 #define SECONDS_PER_DAY 86400L
@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // utility code, some of this could be exposed in the DateTime API if needed
 
-static uint8_t daysInMonth [] PROGMEM = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+const static uint8_t daysInMonth [] PROGMEM = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
 // number of days since 2000/01/01, valid for 2001..2099
 static uint16_t date2days(uint16_t y, uint8_t m, uint8_t d) {
@@ -130,81 +130,81 @@ uint8_t RTC_DS1340::begin(void) {
 
 uint8_t RTC_DS1340::isrunning(void) {
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(0);	
+  Wire.write(0);	
   Wire.endTransmission();
 
   Wire.requestFrom(DS1340_ADDRESS, 1);
-  uint8_t ss = Wire.receive();
+  uint8_t ss = Wire.read();
   return !(ss>>7);
 }
 
 void RTC_DS1340::adjust(const DateTime& dt) {
     Wire.beginTransmission(DS1340_ADDRESS);
-    Wire.send(0);
-    Wire.send(bin2bcd(dt.second()));
-    Wire.send(bin2bcd(dt.minute()));
-    Wire.send(bin2bcd(dt.hour()));
-    Wire.send(bin2bcd(0));
-    Wire.send(bin2bcd(dt.day()));
-    Wire.send(bin2bcd(dt.month()));
-    Wire.send(bin2bcd(dt.year() - 2000));
-    Wire.send(0);
+    Wire.write(0);
+    Wire.write(bin2bcd(dt.second()));
+    Wire.write(bin2bcd(dt.minute()));
+    Wire.write(bin2bcd(dt.hour()));
+    Wire.write(bin2bcd(0));
+    Wire.write(bin2bcd(dt.day()));
+    Wire.write(bin2bcd(dt.month()));
+    Wire.write(bin2bcd(dt.year() - 2000));
+    Wire.write(0);
     Wire.endTransmission();
 }
 
 DateTime RTC_DS1340::enabletricklecharger() {
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(8);	
-  Wire.send(0xA6); // No diode, 2k resistor (Don't use 250 ohm on arduino. It will burn the resistor with VCC above 3.63V)
+  Wire.write(8);	
+  Wire.write(0xA6); // No diode, 2k resistor (Don't use 250 ohm on arduino. It will burn the resistor with VCC above 3.63V)
   Wire.endTransmission();
 }
 
 DateTime RTC_DS1340::disabletricklecharger() {
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(8);	
-  Wire.send(0x00); // No charge at all
+  Wire.write(8);	
+  Wire.write(0x00); // No charge at all
   Wire.endTransmission();
 }
 
 DateTime RTC_DS1340::enableFTout() {
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(7);	
+  Wire.write(7);	
   Wire.endTransmission();
   
   Wire.requestFrom(DS1340_ADDRESS, 1);
-  uint8_t setreg = Wire.receive() | 0xC0; // Read from address 7 and set OUT and FT high
+  uint8_t setreg = Wire.read() | 0xC0; // Read from address 7 and set OUT and FT high
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(7);	
-  Wire.send(setreg);                      // Put the values back where they came from
+  Wire.write(7);	
+  Wire.write(setreg);                      // Put the values back where they came from
   Wire.endTransmission();
 }
 
 DateTime RTC_DS1340::disableFTout() {
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(7);	
+  Wire.write(7);	
   Wire.endTransmission();
   
   Wire.requestFrom(DS1340_ADDRESS, 1);
-  uint8_t setreg = Wire.receive() & 0xBF; // Read from address 7 and set FT low
+  uint8_t setreg = Wire.read() & 0xBF; // Read from address 7 and set FT low
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(7);	
-  Wire.send(setreg);                      // Write the values back
+  Wire.write(7);	
+  Wire.write(setreg);                      // Write the values back
   Wire.endTransmission();
 }
 
 DateTime RTC_DS1340::now() {
   Wire.beginTransmission(DS1340_ADDRESS);
-  Wire.send(0);	
+  Wire.write(0);	
   Wire.endTransmission();
   
   Wire.requestFrom(DS1340_ADDRESS, 7);
-  uint8_t ss = bcd2bin(Wire.receive() & 0x7F);
-  uint8_t mm = bcd2bin(Wire.receive());
-  uint8_t hh = bcd2bin(Wire.receive());
-  Wire.receive();
-  uint8_t d = bcd2bin(Wire.receive());
-  uint8_t m = bcd2bin(Wire.receive());
-  uint16_t y = bcd2bin(Wire.receive()) + 2000;
+  uint8_t ss = bcd2bin(Wire.read() & 0x7F);
+  uint8_t mm = bcd2bin(Wire.read());
+  uint8_t hh = bcd2bin(Wire.read());
+  Wire.read();
+  uint8_t d = bcd2bin(Wire.read());
+  uint8_t m = bcd2bin(Wire.read());
+  uint16_t y = bcd2bin(Wire.read()) + 2000;
   
   return DateTime (y, m, d, hh, mm, ss);
 }
