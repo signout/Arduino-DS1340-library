@@ -32,10 +32,10 @@ public:
     static void adjust(const DateTime& dt);
     uint8_t isrunning(void);
     static DateTime now();
-    static DateTime enabletricklecharger(void);
-    static DateTime disabletricklecharger(void);
-    static DateTime enableFTout(void);
-    static DateTime disableFTout(void);
+    static uint8_t enabletricklecharger(void);
+    static uint8_t disabletricklecharger(void);
+    static uint8_t enableFTout(void);
+    static uint8_t disableFTout(void);
 };
 
 // RTC using the internal millis() clock, has to be initialized before use
