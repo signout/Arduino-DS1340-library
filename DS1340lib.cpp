@@ -2,7 +2,9 @@
 // Released to the public domain! Enjoy!
 
 #include <Wire.h>
-#include <avr/pgmspace.h>
+#if !defined(ESP_PLATFORM)
+  #include <avr/pgmspace.h>
+#endif
 #include "DS1340lib.h"
 #include <Arduino.h>
 
@@ -152,37 +154,41 @@ void RTC_DS1340::adjust(const DateTime& dt) {
     Wire.endTransmission();
 }
 
-DateTime RTC_DS1340::enabletricklecharger() {
+uint8_t RTC_DS1340::enabletricklecharger() {
   Wire.beginTransmission(DS1340_ADDRESS);
   Wire.write(8);	
   Wire.write(0xA6); // No diode, 2k resistor (Don't use 250 ohm on arduino. It will burn the resistor with VCC above 3.63V)
-  Wire.endTransmission();
+  return Wire.endTransmission();
 }
 
-DateTime RTC_DS1340::disabletricklecharger() {
+uint8_t RTC_DS1340::disabletricklecharger() {
   Wire.beginTransmission(DS1340_ADDRESS);
   Wire.write(8);	
   Wire.write(0x00); // No charge at all
-  Wire.endTransmission();
+  return Wire.endTransmission();
 }
 
-DateTime RTC_DS1340::enableFTout() {
+uint8_t RTC_DS1340::enableFTout() {
+  uint8_t status;
   Wire.beginTransmission(DS1340_ADDRESS);
   Wire.write(7);	
-  Wire.endTransmission();
+  status = Wire.endTransmission();
+  if (status != 0) { return status; }
   
   Wire.requestFrom(DS1340_ADDRESS, 1);
   uint8_t setreg = Wire.read() | 0xC0; // Read from address 7 and set OUT and FT high
   Wire.beginTransmission(DS1340_ADDRESS);
   Wire.write(7);	
   Wire.write(setreg);                      // Put the values back where they came from
-  Wire.endTransmission();
+  return Wire.endTransmission();
 }
 
-DateTime RTC_DS1340::disableFTout() {
+uint8_t RTC_DS1340::disableFTout() {
+  uint8_t status;
   Wire.beginTransmission(DS1340_ADDRESS);
   Wire.write(7);	
-  Wire.endTransmission();
+  status = Wire.endTransmission();
+  if (status != 0) { return status; }
   
   Wire.requestFrom(DS1340_ADDRESS, 1);
   uint8_t setreg = Wire.read() & 0xBF; // Read from address 7 and set FT low
